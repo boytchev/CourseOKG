@@ -1,0 +1,168 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			
+			// Задача: Нарисувайте остров на Кох - многоъгълник,
+			// всяка страна на който е заменена с отсечка на
+			// Кох, като отсечката е раздробена със случайни
+			// по размер и ориентация равнобедрени триъгълници
+			
+	
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'aliceblue' );
+			
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			
+			// това е контурът на острова - ще подменяме геометрията му многократно
+			var line = new THREE.Line( 
+				new THREE.BufferGeometry(),
+				new THREE.LineBasicMaterial( {color: 'black'} )
+			);
+			scene.add( line );
+			
+			var x = 0;
+			var y = 0;
+			var dir = 0;
+			var midx = 0;
+			var midy = 0;
+			var midn = 0;
+			var vertices = [];
+
+			// движение напред
+			function fd(d)
+			{
+				x += d*Math.cos(dir);
+				y += d*Math.sin(dir);
+				vertices.push( new THREE.Vector3( x, y, 0 ) );
+				
+				// за центъра на острова: акумулираме всички
+				// (x,y) и броят им, за да намерим центъра
+				midx += x;
+				midy += y;
+				midn++;
+			}
+			
+			// завой наляво
+			function lt( a )
+			{
+				dir += a*Math.PI/180;
+			}
+			
+			// завой надясно
+			function rt( a )
+			{
+				lt( -a );
+			}
+			
+			
+			// рисуване на отсечка на Кох с дадена дължина
+			// и брой оставащи нива на раздробяване
+			function kochSegment( L, level )
+			{
+				if( level )
+				{
+					// максимално отклонение на случайния ъгъл
+					var aMax = 40+level*6;
+					// случаен ъгъл от 50% до 100% от максималното отклонение
+					var angle = aMax*(0.5+0.5*Math.random());
+					// с вероятност 50% сменяме знака на ъгъла от + на -
+					if( Math.random() > 0.5 ) angle = -angle;
+					// случайна дължина на първия (и последния) участък на
+					// отсечката, като той е от 1/6 до 1/3 от дължината ѝ
+					var k = (1/6+1/6*Math.random())*L;
+					// еднозначно изчисляваме страната на равнобедрен триъгълни,
+					// с ъгъл angle в основата и такава нейна дължина, че заедно
+					// с двата отрязъка k да сглобява пълната дължина на отсечката
+					var m = (L-2*k)/Math.cos(angle*Math.PI/180)/2;
+					// оттук надолу си е като Снежинката на Кох, но ъглите
+					// и дължините са от вече пресметнатите angle, k и m
+					level--;
+					kochSegment( k, level );
+					lt( angle );
+					kochSegment( m, level );
+					rt( 2*angle );
+					kochSegment( m, level );
+					lt( angle );
+					kochSegment( k, level );
+				}
+				else
+				{	// дъно на рекурсията, не раздробяваме
+					// повече отсечката, просто я рисуваме
+					fd( L );
+				}
+			}
+			
+			var line;
+			
+			function newIsland()
+			{
+				var n = 5; // n-ъгълник
+				var len = 10; // първоначална дължина на отсечката
+
+				x = 0;
+				y = 0;
+				dir = 0;
+				
+				midx = 0; // с тези променливи ще търсим
+				midy = 0; // центъра на острова, за да сложим
+				midn = 0; // гледната точка точно над него
+
+				// списък от върховете на острова (без var, за да е глобален)
+				vertices = [];
+			
+				// рисуване на първоначалната точка
+				fd( 0 );
+
+				// рисуване на острова
+				for( var i=0; i<n; i++ )
+				{
+					kochSegment( len, 5 );
+					rt( 360/n );
+				}
+			
+				// създаваме линеен обект (начупена линия) от списъка от точки
+				// подменяме геометрията на вече създадения обект line
+				line.geometry.dispose();
+				line.geometry =  new THREE.BufferGeometry().setFromPoints( vertices );
+			}
+			
+			var frame = 0;
+			function drawFrame( t )
+			{
+				t = t/2000;
+				
+				// на всеки 500 кадъра правим нов остров
+				if( frame%500==0 ) newIsland();
+				frame++;
+				
+				// позиционираме гледната точка точно над центъра на острова
+				camera.position.set( midx/midn, midy/midn, 40 );
+				camera.lookAt( new THREE.Vector3( midx/midn, midy/midn, 0 ) );
+				camera.up.copy( new THREE.Vector3( Math.cos(t), Math.sin(t), 0 ) );
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

@@ -1,0 +1,98 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+			
+			// Задача: Нарисувайте Гъба на Менгер. Поне на 3 нива.
+			
+	
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 4 );
+
+			// започваме от куб
+			var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+
+			// Използва като база обекта menger и прави 20
+			// копия по върховете на Гъба на Менгер в група
+			function mengerFractal()
+			{
+				var box = geometry;
+				
+				// смаляваме трикртано
+				box.scale( 1/3, 1/3, 1/3 );
+				
+				// новите подгеометрии, които ще слеем накрая
+				var subboxes = [];
+
+				// цикъл за обхождане на 20-те върха на гъбата
+				for( var x=-1; x<=1; x++ )
+				for( var y=-1; y<=1; y++ )
+				for( var z=-1; z<=1; z++ )
+					if( Math.abs(x)+Math.abs(y)+Math.abs(z) > 1 )
+					{
+						// сливаме обекта във върха (x,y,z) с menger
+						box.translate( x/3, y/3, z/3 );	// местим където трябва
+						subboxes.push( box.clone() );
+						box.translate( -x/3, -y/3, -z/3 ); // връщаме в начално положение
+					}
+					
+				// подменяме фракталната геометрия с раздробена геометрия
+				geometry.dispose();
+				geometry = BufferGeometryUtils.mergeGeometries( subboxes );
+			}
+
+			// раздробяваме три пъти -- че 4-ти вече ще е много бавно,
+			// но ползвахме една геометрия с много върхове, щеше да
+			// може и повече раздробявания
+			mengerFractal();
+			mengerFractal();
+			mengerFractal();
+			mengerFractal();
+
+			var menger = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( {shininess: 1000} ) );
+			scene.add( menger );
+			
+			
+			var light = new THREE.PointLight( 'white', 0.5 );
+			light.position.set( 0, 0, 0 );
+			scene.add( light );
+			
+			light = new THREE.PointLight( 'gold', 6 );
+			light.position.set( 0, 2, 1 );
+			scene.add( light );
+
+			
+			function drawFrame( t )
+			{
+				menger.rotation.x = t/1000;
+				menger.rotation.y = t/1100;
+				menger.rotation.z = t/1200;
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

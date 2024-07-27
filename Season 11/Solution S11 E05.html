@@ -1,0 +1,210 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			
+			// Задача: Нарисувайте планински терен.
+			//
+			// Това, което е готово, е:
+			//		terrain - равнинен терен от (n+1)x(n+1) върха (от 0 до n)
+			//		get(i,j) - функции за получаване на координатите на връх (i,j)
+			//		set(i,j,v) - функции за променяне на координатите на връх (i,j)
+			//		автоматично оцветяване на върховете
+			//		полупрозрачно морско равнище
+	
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'cornsilk' );
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 60, 150 );
+			camera.lookAt( new THREE.Vector3( 0, 5, 0 ) );
+
+			// индексите на върхове по двете оси се менят
+			// от 0 до n включително (n да е степен на двойката)
+			var n = 128;
+			
+			// геометрия на терена от (n+1)*(n+1) върха
+			var geometry = new THREE.PlaneGeometry( 100, 100, n, n );
+			var pos = geometry.getAttribute('position');
+
+			// от (x,y) координати на връх изчислява неговия индекс
+			function index( x, y )
+			{
+				return x+(n+1)*y;
+			}
+			
+			// от (x,y) координати на връх връща неговите координати като Vector3
+			function get( x, y )
+			{
+				var i = index(x,y);
+				return new THREE.Vector3( pos.getX(i), pos.getY(i), pos.getZ(i) );
+			}
+			
+			// от (x,y) координати на връх променя неговите координати с Vector3 параметър v
+			function set( x, y, v )
+			{
+				pos.setXYZ( index(x,y), v.x, v.y, v.z );
+			}
+			
+			// намира средна точка между два върха
+			function mid( x1, y1, x2, y2 )
+			{
+				var v = get( x1, y1 ).clone();
+				v = v.add( get(x2,y2) );
+				return v.divideScalar( 2 );
+			}
+
+			// намира средна точка между читири върха
+			function mid4( x1, y1, x2, y2, x3, y3, x4, y4 )
+			{
+				var v = mid( x1, y1, x2, y2 );
+				v = v.add( mid(x3,y3,x4,y4) );
+				return v.divideScalar( 2 );
+			}
+			
+			// симулира тектоника (с прости думи: гърчи терена)
+			// (x1,y1) е единия връх на квадратно каре, а
+			// (x2,y2) е диагонално противоположният
+			function geoform( x1, y1, x2, y2 )
+			{
+				// ако сме стигнали каре 1x1 - излизаме,
+				// понеже няма какво да гърчим в него
+				if( x2-x1 < 2 ) return;
+				
+				// намираме индексите на междинната точка
+				// винаги се получават цели числа
+				var xm = (x1+x2)/2;
+				var ym = (y1+y2)/2;
+
+				// смятаме координатите на 4-те междинни точки
+				// (горна, лява, дясна, долна)
+				set( xm, y1, mid(x1,y1,x2,y1) );
+				set( x1, ym, mid(x1,y1,x1,y2) );
+				set( x2, ym, mid(x2,y1,x2,y2) );
+				set( xm, y2, mid(x1,y2,x2,y2) );
+				// смятаме координатите на централната междинна точка
+				set( xm, ym, mid4(xm,y1,xm,y2,x1,ym,x2,ym) );
+
+				// коефициент на случайност
+				var r = 0.8*(x2-x1);
+				
+				// променяме централната междинна точка
+				// по случаен начин
+				var v = get( xm, ym );
+				v.x += r*(Math.random()-0.5)/2;
+				v.y += r*(Math.random()-0.5)/2;
+				v.z += r*(Math.random()-0.45);
+				set( xm, ym, v );
+
+				// рекурсивно извикваме същата функция,
+				// но за 4-те по-малки квадрата
+				geoform( x1, y1, xm, ym );
+				geoform( xm, y1, x2, ym );
+				geoform( x1, ym, xm, y2 );
+				geoform( xm, ym, x2, y2 );
+				
+			}
+
+			// генериране на целия терен
+			geoform( 0, 0, n, n, 1 );
+
+			// преизчисляване на нормалните вектори
+			geometry.computeVertexNormals();
+			
+			
+			// помошна функция за определяне на цвят
+			// според надморската височина z, като
+			// резултатът е масив от три числа - r, g и b
+			function getColor( z )
+			{
+				var f = THREE.MathUtils.mapLinear; // даваме по-кратко име
+
+				var K = -10;	// ниво на черен цвят
+				var B = -5;		// ниво на син цвят
+				var Y = 0;		// на жълт цвят
+				var G = 5;		// на зелен
+				var R = 15;		// червен
+				var W = 20;		// бял
+
+				// интерполиране на цвета според височината z
+				if( z<K ) return [0, 0, 0];
+				if( z<B ) return [0, 0, f( z,K,B,0,1 )];
+				if( z<Y ) return [f( z,B,Y,0,0.7 ), f( z,B,Y,0,0.7 ), f( z,B,Y,1,0 ) ];
+				if( z<G ) return [f( z,Y,G,0.7,0 ), f( z,Y,G,0.7,0.5 ), f( z,Y,G,0,0 ) ];
+				if( z<R ) return [f( z,G,R,0,0.85 ), f( z,G,R,0.5,0.5 ), f( z,G,R,0,0 ) ];
+				if( z<W ) return [f( z,R,W,0.85,1 ), f( z,R,W,0.5,1 ), f( z,R,W,0,1 ) ];
+				return [1, 1, 1];
+			}
+			
+			
+			// обхождане на всички върхове и оцветяването им
+			// според височината им 
+			var colors = [];
+			for( var i=0; i<pos.count; i++ )
+			{
+				var z = pos.getZ( i );
+				colors.push( ...getColor( z ) );
+			}
+
+			// създаваме нов атрибут с цвят за всеки връх
+			geometry.setAttribute( 'color', new THREE.BufferAttribute(new Float32Array(colors),3) );
+
+			var material = new THREE.MeshPhongMaterial( {
+				color: 'white',
+				shininess: 50,
+				side: THREE.DoubleSide,
+				vertexColors: true, // позволява всеки връх да има собствен цвят
+			} );
+			
+			// създаваме земята
+			var terrain = new THREE.Mesh( geometry, material );
+			terrain.rotation.x = -Math.PI/2;
+			scene.add( terrain );
+			
+			// създаваме и водата
+			geometry = new THREE.PlaneGeometry( 100, 100 );
+			material = new THREE.MeshPhongMaterial( {color: 'blue', transparent: true, opacity: 0.5, shininess: 0, specular: 'white'} );
+			var water = new THREE.Mesh( geometry, material );
+			water.position.y = -0.1;
+			water.rotation.x = -Math.PI/2;
+			scene.add( water );
+			
+			// създаваме светлината (очевидно не следваме
+			// реда на създаване според Библията - може да
+			// пробвате дали, ако се създават в библейския
+			// ред, ще се получи по-разбран код)
+			var light = new THREE.PointLight( 'white', 20000 );
+			light.position.set( 30, 80, 0 );
+			scene.add( light );
+			
+			function drawFrame( t )
+			{
+				terrain.rotation.z = t/1500;
+				water.rotation.z = t/1500;
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

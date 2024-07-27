@@ -1,0 +1,79 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			
+			// Задача: Нарисувайте вълшебно дърво. Вие избирате
+			// какво да е вълшебството му. Например, вятърът го
+			// прави да танцува, листата са като рояк светулки
+			// и се движат постоянно и т.н.
+	
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 30, 120 );
+			camera.lookAt( new THREE.Vector3( 0, 20, 0 ) );
+
+			// дървото (в момента е с окастрени клони и
+			// не е вълшебно)
+			var tree = new THREE.Mesh(
+					new THREE.CylinderGeometry( 0.1, 3, 30 ),
+					new THREE.MeshPhongMaterial( {color: 'brown'} )
+			);
+			tree.position.set( 0, 15, 0 );
+			scene.add( tree );
+
+			// листа (без листни въшки)
+			var leaves = new THREE.Mesh(
+					new THREE.IcosahedronGeometry( 10, 2 ),
+					new THREE.MeshPhongMaterial( {color: 'lime', flatShading: true} )
+			);
+			leaves.position.set( 0, 30, 0 );
+			scene.add( leaves );
+				
+
+			// създаваме земята
+			var terrain = new THREE.Mesh(
+				new THREE.BoxGeometry( 20, 1, 20 ),
+				new THREE.MeshPhongMaterial( {color: 'green'} )
+			);
+			terrain.position.set( 0, -1/2, 0 );
+			scene.add( terrain );
+
+			
+			// светлина
+			var light = new THREE.PointLight( 'white', 10000 );
+			light.position.set( 0, 50, 50 );
+			scene.add( light );
+			
+			function drawFrame( t )
+			{
+				t = t/1000;
+				
+				scene.rotation.y = t;
+				light.position.set( 20*Math.sin(-t), 20, 20*Math.cos(-t) );
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

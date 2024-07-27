@@ -1,0 +1,61 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			
+			// Задача: Нарисувайте Гъба на Менгер. Поне на 3 нива.
+			
+	
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 4 );
+
+			// започваме от куб
+			var material = new THREE.MeshPhongMaterial( {shininess: 1000} );
+			var menger = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 1 ), material );
+			// от мен - толкова, нататък сте вие...
+			
+			scene.add( menger );
+			
+			
+			var light = new THREE.PointLight( 'white', 0.5 );
+			light.position.set( 0, 0, 0 );
+			scene.add( light );
+			
+			light = new THREE.PointLight( 'gold', 6 );
+			light.position.set( 0, 2, 1 );
+			scene.add( light );
+
+			
+			function drawFrame( t )
+			{
+				menger.rotation.x = t/1000;
+				menger.rotation.y = t/1100;
+				menger.rotation.z = t/1200;
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

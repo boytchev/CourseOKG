@@ -1,0 +1,116 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			
+			// Задача: Нарисувайте Снежинка на Кох, започваки
+			// от равностранен триъгълник и ползвайки
+			// функциите fd, lt и rt.
+			
+	
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'darkslateblue' );
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 30 );
+
+			// в този масив ще се пази списък от върховете на линията
+			var vertices = [];
+			
+			// движение напред
+			function fd( d )
+			{
+				x += d*Math.cos(dir);
+				y += d*Math.sin(dir);
+				vertices.push( new THREE.Vector3( x, y, 0 ) );
+			}
+			
+			// завой наляво
+			function lt( a )
+			{
+				dir += a*Math.PI/180;
+			}
+			
+			// завой надясно
+			function rt( a )
+			{
+				lt( -a );
+			}
+			
+			
+			// рисуване на отсечка на Кох с дадена дължина
+			// и брой оставащи нива на раздробяване
+			function kochSegment( len, level )
+			{
+				if( level )
+				{
+					len /= 3.0;
+					level--;
+					kochSegment( len, level );
+					lt( 60 );
+					kochSegment( len, level );
+					rt( 120 );
+					kochSegment( len, level );
+					lt( 60 );
+					kochSegment( len, level );
+				}
+				else
+				{	// дъно на рекурсията, не раздробяваме
+					// повече отсечката, просто я рисуваме
+					fd( len );
+				}
+			}
+			
+		
+			var len = 10; // първоначална дължина на отсечката
+			var x = -len/2;
+			var y = len*Math.sqrt(3)/6;
+			var dir = 0;
+			
+            // рисуване на първоначалната точка
+            fd( 0 );
+
+            // рисуване на снежинката
+			for( var i=0; i<3; i++ )
+			{
+				kochSegment( len, 5 );
+				rt( 120 );
+			}
+			
+			// създаваме линеен обект (начупена линия) от списъка от точки
+			var line = new THREE.Line( 
+				new THREE.BufferGeometry().setFromPoints( vertices ),
+				new THREE.LineBasicMaterial( {color: 'cyan'} )
+			);
+			scene.add( line );
+
+		
+			function drawFrame( t )
+			{
+				scene.rotation.z = t/1500;
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

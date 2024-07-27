@@ -1,0 +1,106 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+
+			// Задача: Дефинирайте функции fd(d) за ходене
+			// напред, lt(a) за завой наляво и rt(a) за
+			// завой надясно, така че с кода по-долу
+			// (коментиран с "рисуване") да се нарисува
+			// квадрат и описана окръжност.
+			
+	
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'indianred' );
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 30 );
+
+			// в този масив ще събираме 3D координати на точки
+			var vertices = [];
+			
+			// функция за движение напред
+			function fd( d )
+			{
+				// ДА СЕ ДОПИШЕ
+				// от (x,y) и dir можете да сметнете новите (x,y)
+				x = ...
+				y = ...
+				
+				// запомняме точката в списъка от върхове
+				vertices.push( new THREE.Vector3( x, y, 0 ) );
+			}
+			
+			// функция за завой наляво
+			function lt( a )
+			{
+				// ДА СЕ ДОПИШЕ
+				// от (x,y) и dir можете да сметнете новото dir
+				dir = ...
+			}
+			
+			// функция за завой надясно
+			function rt( a )
+			{
+				// ДА СЕ ДОПИШЕ
+				// от (x,y) и dir можете да сметнете новото dir
+				dir = ...
+			}
+			
+			
+			var x = -5; // начална позиция по X
+			var y = -5; // начална позиция по Y
+			var dir = 0; // начална посока в радиани
+			
+            // рисуване на първоначалната точка
+            fd( 0 );
+
+            // рисуване на квадрат
+            fd( 10 ); // 10 стъпки
+            lt( 90 ); // 90 градуса наляво
+            fd( 10 ); // 10 стъпки
+            lt( 90 ); // пак наляво 90 градуса
+            fd( 10 ); // и т.н.
+            lt( 90 );
+            fd( 10 );
+
+            // рисуване на окръжност
+			// ДА СЕ ДОПИШЕ
+			
+			// създаваме линеен обект (начупена линия) от списъка от точки
+			var line = new THREE.Line( 
+				new THREE.BufferGeometry().setFromPoints( vertices ),
+				new THREE.LineBasicMaterial( {color: 'yellow'} )
+			);
+			scene.add( line );
+
+		
+			function drawFrame( t )
+			{
+				scene.rotation.y = t/1000;
+	
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

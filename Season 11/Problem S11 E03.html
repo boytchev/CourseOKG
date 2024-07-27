@@ -1,0 +1,107 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			
+			// Задача: Нарисувайте остров на Кох - многоъгълник,
+			// всяка страна на който е заменена с отсечка на
+			// Кох, като отсечката е раздробена със случайни
+			// по размер и ориентация равнобедрени триъгълници
+			
+	
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'aliceblue' );
+			
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 30 );
+
+			// в този масив ще се пази списък от върховете на линията
+			var vertices = [];
+			
+			// движение напред
+			function fd( d )
+			{
+				x += d*Math.cos(dir);
+				y += d*Math.sin(dir);
+				vertices.push( new THREE.Vector3( x, y, 0 ) );
+			}
+			
+			// завой наляво
+			function lt( a )
+			{
+				dir += a*Math.PI/180;
+			}
+			
+			// завой надясно
+			function rt( a )
+			{
+				lt( -a );
+			}
+			
+			
+			// рисуване на отсечка на Кох с дадена дължина
+			// и брой оставащи нива на раздробяване
+			function kochSegment( L, level )
+			{
+				fd( L );
+			}
+			
+			var len = 10; // първоначална дължина на отсечката
+			var x = 0;
+			var y = 0;
+			var dir = 0;
+			
+
+			// рисуване на първоначалната точка
+            fd( 0 );
+
+			// рисуване на острова
+			for( var i=0; i<3; i++ )
+			{
+				kochSegment( len, 5 );
+				rt( 120 );
+			}
+		
+			// създаваме линеен обект (начупена линия) от списъка от точки
+			var line = new THREE.Line( 
+				new THREE.BufferGeometry().setFromPoints( vertices ),
+				new THREE.LineBasicMaterial( {color: 'black'} )
+			);
+			scene.add( line );
+			
+			
+			function drawFrame( t )
+			{
+				t = t/2000;
+				
+				// позиционираме гледната точка точно над центъра на острова
+				// засега това не е вярно, но вие ще го направите вярно
+				camera.position.set( 0, 0, 40 );
+				camera.lookAt( new THREE.Vector3() );
+				camera.up.copy( new THREE.Vector3( Math.cos(t), Math.sin(t), 0 ) );
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

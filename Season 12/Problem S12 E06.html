@@ -1,0 +1,76 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/"
+			} }
+		</script>
+	</head>
+	<body>
+		
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			// Задача: Напишете "Край!" на български и на японски
+			// като използвате тримерни обекти за символите,
+			// но не да си ги направите ръчно, а да ползвате
+			// готови Three.jsски средства.
+	
+			var renderer = new THREE.WebGLRenderer( {antialias: true} );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+			
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'white' );
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 30 );
+			
+			// това ще е фона отзад, който светлините ще
+			// го правят да изглежда с преливащи цветове
+			var back = new THREE.Mesh(
+				new THREE.BoxGeometry( 70, 50, 1 ),
+				new THREE.MeshPhongMaterial( {color: 'white'} )
+			);
+			back.position.z = -10;
+			scene.add( back );
+
+			
+			// няколко светлини, първите четири ще се въртят
+			// в кръг около текста, петата ще е неподвижна
+			var lights = [];
+			var colors = ['red', 'yellow', 'green', 'blue', 'white'];
+			for( var i=0; i<5; i++ )
+			{
+				var light = new THREE.PointLight( colors[i], 3 );
+				light.decay = 0;
+				lights.push( light );
+				scene.add( light );
+			}
+			lights[4].intensity = 2;
+			lights[4].position.set( 0, 0, 5 );
+			
+			
+			function drawFrame( t )
+			{
+				// въртене на светлините
+				for( var i=0; i<4; i++ )
+				{
+					var a = t/2000+i*(1+i/5);
+					lights[i].position.set( 30*Math.cos(a), 0, 10*Math.sin(a) );
+				}
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

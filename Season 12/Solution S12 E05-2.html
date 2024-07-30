@@ -1,0 +1,98 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/"
+			} }
+		</script>
+	</head>
+	<body>
+		<video id="video" autoplay muted loop playsinline style="display:none">
+			<source src="mp4/tv.mp4" type='video/mp4'>
+		</video>
+		
+		<button style="margin: 1em; position:fixed; z-index:1000;" onclick="video.play()">Старт на видеото</button>
+		
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+		
+			// Задача: Използвайте видео за динамична промяна
+			// на релефа на куб
+			
+	
+			var renderer = new THREE.WebGLRenderer( {antialias: true} );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.outputColorSpace = THREE.LinearSRGBColorSpace;renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+			
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'lightgray' );
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 25 );
+			
+			var video = document.getElementById( 'video' );
+			var texture = new THREE.VideoTexture( video );
+			texture.minFilter = THREE.LinearFilter;
+			texture.magFilter = THREE.LinearFilter;
+			texture.format = THREE.RGBFormat;
+
+			// тук вече е лесно, видеотекстурата закачаме за
+			// displacemetMap, но е добре преди това да
+			// направим кубът да е доста детайлен, с много
+			// вътрешни върхове по стените си
+			var cube = new THREE.Mesh(
+				new THREE.BoxGeometry( 6, 6, 6, 128, 128, 128 ),
+				new THREE.MeshPhongMaterial({
+					map: texture,
+					color: 'pink',
+					bumpMap: texture,
+					bumpScale: 4,
+					specularMap: texture,
+					displacementMap: texture,
+					displacementScale: 2,
+					shininess: 300,
+					specular: 'white',
+					emissive: 'crimson',
+					emissiveIntensity: 0.2,
+				})
+			);
+			scene.add(cube);
+			
+	
+			var light = new THREE.AmbientLight( 'white', 3 );
+			scene.add( light );
+			
+			light = new THREE.PointLight( 'white', 3 );
+			light.decay = 0;
+			light.position.set( 0, 0, 9 );
+			scene.add( light );
+			
+			light = new THREE.PointLight( 'white', 3 );
+			light.decay = 0;
+			light.position.set( 9, 0, 9 );
+			scene.add( light );
+			
+			light = new THREE.PointLight( 'white', 3 );
+			light.decay = 0;
+			light.position.set( -9, 0, 9 );
+			scene.add( light );
+			
+			function drawFrame( t )
+			{
+				scene.rotation.set( t/2700, t/2800, t/3100 );
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

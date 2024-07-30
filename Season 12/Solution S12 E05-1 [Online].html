@@ -1,0 +1,98 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/"
+			} }
+		</script>
+	</head>
+	<body>
+		<!-- Използваме HTML5, за да създадем елемент, в
+		който да се проиграва видео клипът. Но този елемент
+		е скрит и не се вижда на уеб страницата. Въпреки
+		това той се проиграва, а генерираните кадри ще
+		"открадваме" и използваме като текстура. За целта
+		ползваме VideoTexture.js, който ръчно включваме. -->
+		<video id="video" autoplay muted loop playsinline style="display:none" crossOrigin="anonymous">
+			<source src="https://cdn.jsdelivr.net/gh/boytchev/CourseOKG@main/Season%2012/mp4/tv.mp4" type='video/mp4'>
+		</video>
+
+		<button style="margin: 1em; position:fixed; z-index:1000;" onclick="video.play()">Старт на видеото</button>
+		
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			
+			// Задача: Покажете видеоклип като текстура по
+			// стените на кубовете.
+			
+	
+			var renderer = new THREE.WebGLRenderer( {antialias: true} );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.outputColorSpace = THREE.LinearSRGBColorSpace;renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+			
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'antiquewhite' );
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 25 );
+		
+		
+			// Намираме елемента с видеото и създаваме
+			// текстура, която автматично си взима картинка
+			// от текущия кадър на видеото
+			var video = document.getElementById( 'video' );
+			var texture = new THREE.VideoTexture( video );
+			texture.minFilter = THREE.LinearFilter;
+			texture.magFilter = THREE.LinearFilter;
+			texture.format = THREE.RGBFormat;
+
+			// Създаваме куба със съответния материал с
+			// видеотекстура
+			var cube = new THREE.Mesh(
+				new THREE.BoxGeometry( 6, 6, 6),
+				new THREE.MeshBasicMaterial( {map: texture} )
+			);
+			scene.add( cube );
+			
+			// Ръбчетата, нека да ги оформим
+			var edges = new THREE.BoxHelper( cube, 'dodgerblue' );
+			scene.add( edges );
+
+			// Създаваме и малките кубчета на базата на
+			// същата видеотекстура
+			for( var x=-3; x<4; x+=6 )
+			for( var y=-3; y<4; y+=6 )
+			for( var z=-3; z<4; z+=6 )
+			{
+				var cube = new THREE.Mesh(
+					new THREE.BoxGeometry( 2, 2, 2 ),
+					new THREE.MeshBasicMaterial( {map: texture} )
+				);
+				cube.position.set( x, y, z );
+				scene.add( cube );
+
+				// и на малките кубчета - ръбченцата
+				var edges = new THREE.BoxHelper( cube, 'dodgerblue' );
+				scene.add( edges );
+			}
+			
+			
+			function drawFrame( t )
+			{
+				scene.rotation.set( t/1000, t/1100, t/1300 );
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

@@ -1,0 +1,58 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			// Задача: Нарисувайте човек чрез използване на
+			// готов тримерен модел			
+	
+			var renderer = new THREE.WebGLRenderer( {antialias: true} );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.outputColorSpace = THREE.LinearSRGBColorSpace;renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color(0x000040);
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 25 );
+			
+			
+			// тук слагам кубче, да не е празен примера
+			var cube = new THREE.Mesh( 
+				new THREE.BoxGeometry( 1, 1, 1 ),
+				new THREE.MeshPhongMaterial()
+			);
+			scene.add( cube );
+
+
+			// светлина
+			var light = new THREE.PointLight( 'white', 100 );
+			light.position.set( 0, 5, 10 );
+			scene.add( light );
+
+		
+			function drawFrame( t )
+			{
+				cube.rotation.set( t/1000, t/1100, t/1300 );
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

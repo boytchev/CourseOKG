@@ -1,0 +1,65 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			// Задача: Залепете картинката paisley.jpg върху
+			// стените на куба
+			
+	
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'pink' );
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 8 );
+
+			// зареждаме текстурата (зареждането е асинхронно,
+			// т.е. не става веднага, а в някой по-късен момент)
+			var texture = new THREE.TextureLoader().load( "jpg/paisley.jpg" );
+			
+			// това е кубът, който искаме да оцветим с картинката
+			var cube = new THREE.Mesh(
+				new THREE.BoxGeometry( 2, 2, 2 ),
+				new THREE.MeshPhongMaterial( {map: texture} )
+			);
+			scene.add( cube );
+			
+			// светлина
+			var light = new THREE.DirectionalLight( 'white', 4 );
+			light.position.set( 0, 0, 3 );
+			scene.add( light );
+
+		
+			function drawFrame( t )
+			{
+				// въртим куба, може в началния момент да е
+				// черен, това става, ако текстурата все още
+				// не е заредена
+				cube.rotation.set( t/1000, t/1100, t/1200 );
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

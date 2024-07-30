@@ -1,0 +1,109 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/"
+			} }
+		</script>
+	</head>
+	<body>
+		
+		<script type="module">
+		
+			import * as THREE from "three";
+			import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+			import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+			
+			// Задача: Напишете "Край!" като използвате тримерни
+			// обекти за символите, но не да си ги направите ръчно,
+			// а да ползвате готови Three.jsски средства.
+	
+			var renderer = new THREE.WebGLRenderer( {antialias: true} );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'white' );
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 30 );
+			
+			
+			// това ще е фона отзад, който светлините ще
+			// го правят да изглежда с преливащи цветове
+			var back = new THREE.Mesh(
+				new THREE.BoxGeometry( 70, 50, 1 ),
+				new THREE.MeshPhongMaterial( {color: 'royalblue'} )
+			);
+			back.position.z = -10;
+			scene.add( back );
+
+			
+			// параметри за оформянето на буквите, подобни
+			// са на плъзгането на форма като в S06 E02
+			var options = {
+					depth: 2,
+					curveSegments: 12,
+					bevelEnabled: true,
+					bevelThickness: 0.03,
+					bevelSize: 0.03
+				};
+				
+			// материал на буквите
+			var material = new THREE.MeshPhongMaterial( {color: 'white', shininess: 100} );
+
+			var text = new THREE.Group();
+
+			// зареждаме шрифта (който е вече в JSON формат), центрираме,
+			// отместваме леко нагоре и ... готово
+			new FontLoader().load( 'json/garamond.json', function ( font )
+				{
+					options.size = 5;
+					options.font = font;
+					var geometry = new TextGeometry( "КРАЙ!", options );
+					geometry.center();
+					text = new THREE.Mesh( geometry, material );
+					scene.add( text );			
+				});
+			
+			// няколко светлини, първите четири ще се въртят
+			// в кръг около текста, петата ще е неподвижна
+			var lights = [];
+			var colors = ['crimson', 'yellow', 'gray', 'royalblue', 'white'];
+			for( var i=0; i<5; i++ )
+			{
+				var light = new THREE.PointLight( colors[i], 5 );
+				light.decay = 0;
+				lights.push( light );
+				scene.add( light );
+			}
+			lights[4].intensity = -100;
+			lights[4].position.set( 0, 0, -50 );
+			
+			
+			function drawFrame( t )
+			{
+				// въртене на светлините
+				for( var i=0; i<4; i++ )
+				{
+					var a = t/2000+i*(1+i/5);
+					lights[i].position.set( 30*Math.cos(a), 0, 10*Math.sin(a) );
+				}
+				
+				// леко поклащане на текста
+				text.rotation.x = 0.5*Math.sin(t/2000);
+				text.rotation.y = 0.7*Math.cos(t/3000);
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

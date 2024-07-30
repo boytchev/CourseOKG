@@ -1,0 +1,84 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			// Задача: Направете Земята - с континенти,
+			// океани и релефни планини
+
+	
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'black' );
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 25 );
+			
+			// подготвяме две текстури - на самата земя и
+			// на надморската височина на всяка точка от нея
+			var texture = new THREE.TextureLoader().load( "https://cdn.jsdelivr.net/gh/boytchev/CourseOKG@main/Season%2012/jpg/earth.jpg" );
+			var bump = new THREE.TextureLoader().load( "https://cdn.jsdelivr.net/gh/boytchev/CourseOKG@main/Season%2012/jpg/earth-bump.jpg" );
+			
+			// създаваме земята, като използваме текстурите
+			// по следния начин:
+			// 		earth.jpg - е само оцветявне на океани
+			//					и суша, в свойството map
+			//		earth-bump.jpg - е за релефа на земята
+			//					и е в свойствата bumpMap
+			//					(за правилното засенчване)
+			//					и displacementMap (за реалното
+			//					издигане на планинския релеф)
+			var earth = new THREE.Mesh(
+				new THREE.SphereGeometry( 5, 128, 64 ),
+				new THREE.MeshPhongMaterial({
+					shininess: 10,
+					map: texture, // шарка на океани и суша
+					displacementMap: bump, // видимо издигане на формата
+					displacementScale: 1/3,
+					bumpMap: bump, // симулирано издигане чрез светлосенки
+					bumpScale: 10
+				})
+			);
+			scene.add( earth );
+
+
+			// светлина
+			var light = new THREE.PointLight( 'white', 5 );
+			light.decay = 0;
+			light.position.set( 50, 10, 80 );
+			scene.add( light );
+		
+			function drawFrame( t )
+			{
+				t = t/3000;
+				
+				earth.rotation.y = -0.5-2*t;
+				var a = 0.3+0.5*Math.sin(t);
+				camera.position.set( 0, 25*Math.sin(a), 25*Math.cos(a) );
+				camera.lookAt( scene.position );
+
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

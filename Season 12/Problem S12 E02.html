@@ -1,0 +1,92 @@
+﻿<html>
+	<head>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+		<script type="importmap">
+			{ "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/"
+			} }
+		</script>
+	</head>
+	<body>
+		<script type="module">
+		
+			import * as THREE from "three";
+			
+			// Задача: Опитайте се да направите шарките на
+			// четирите куба, ползвайки една и съща картинка
+			// за текстура.
+			
+			// Алтернативен адрес на картинката:
+			// https://cdn.jsdelivr.net/gh/boytchev/CourseOKG@main/Season%2012/jpg/crosshatch.jpg
+
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+			renderer.setAnimationLoop( drawFrame );
+			document.body.appendChild( renderer.domElement );
+
+			var scene = new THREE.Scene();
+			scene.background = new THREE.Color( 'firebrick' );
+
+			var aspect = window.innerWidth/window.innerHeight;
+			var camera = new THREE.PerspectiveCamera( 30, aspect );
+			camera.position.set( 0, 0, 20 );
+
+			
+			// четирите куба ще са групирани, за да може
+			// да ги въртим в комплект
+			var cubes = new THREE.Group();
+			scene.add( cubes );
+			
+			// създаване на първия куб
+			var texture = new THREE.TextureLoader().load( "jpg/crosshatch.jpg" );
+			var cube = new THREE.Mesh(
+				new THREE.BoxGeometry( 3, 3, 3 ),
+				new THREE.MeshPhongMaterial( {map: texture} )
+			);
+			cube.position.set( 2, 0, 2 );
+			cubes.add( cube );
+
+			// създаване на втория куб
+			var cube = new THREE.Mesh(
+				new THREE.BoxGeometry( 3, 3, 3 ),
+				new THREE.MeshPhongMaterial( {map: texture} )
+			);
+			cube.position.set( -2, 0, 2 );
+			cubes.add( cube );
+
+			// създаване на третия куб
+			var cube = new THREE.Mesh(
+				new THREE.BoxGeometry( 3, 3, 3 ),
+				new THREE.MeshPhongMaterial( {map: texture} )
+			);
+			cube.position.set( 2, 0, -2 );
+			cubes.add( cube );
+
+			// създаване на четвърти куб
+			var cube = new THREE.Mesh(
+				new THREE.BoxGeometry( 3, 3, 3 ),
+				new THREE.MeshPhongMaterial( {map: texture} )
+			);
+			cube.position.set( -2, 0, -2 );
+			cubes.add( cube );
+
+			// светлина
+			var light = new THREE.DirectionalLight( 'white', 3 );
+			light.position.set( 0, 0, 18 );
+			scene.add( light );
+			
+			function drawFrame( t )
+			{
+				cubes.rotation.set( t/1000, t/1100, t/1200 );
+				
+				renderer.render( scene, camera );
+			}
+			
+		</script>
+	</body>
+</html>

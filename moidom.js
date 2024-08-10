@@ -4,7 +4,7 @@
 /_/_/_/_/_/  \\
 |    _    |  |
 |[] | | []|[]|
-|___|_|___|__| 
+|___|_|___|__|
 
 `
 );
@@ -38,7 +38,7 @@ var scene = new THREE.Scene();
 // камера и гледна точка
 
 var camera = new THREE.PerspectiveCamera( 60, 1, 0.01, 200 );
-	camera.position.set( 30, 60, 60 );
+	camera.position.set( 5, 15, 10 );
 	camera.lookAt( scene.position );
 
 
@@ -48,7 +48,7 @@ var light = new THREE.SpotLight( 'white', 1 );
 	light.decay = 0;
 	light.position.set( 20, 80, 30 );
 	light.target = scene;
-	light.angle = 0.4;
+	light.angle = 0.2;
 	light.penumbra = 1;
 	light.castShadow = true;
 	light.shadow.mapSize.width = 1024; 
@@ -60,7 +60,7 @@ var light = new THREE.SpotLight( 'white', 1 );
 	light.shadow.camera.top = -50; 
 	light.shadow.camera.bottom = 50; 
 	light.shadow.bias = -0.0001; 
-	light.shadow.radius = 2;
+	light.shadow.radius = 3;
 
 	scene.add( light );
 
@@ -69,7 +69,7 @@ var contraLight = new THREE.SpotLight( 'white', 2 );
 	contraLight.decay = 0;
 	contraLight.position.set( -10, 80, -40 );
 	contraLight.target = scene;
-	contraLight.angle = 0.4;
+	contraLight.angle = 0.2;
 	contraLight.penumbra = 1;
 
 	scene.add( contraLight );
@@ -113,7 +113,6 @@ var controls = new OrbitControls( camera, renderer.domElement );
 	controls.screenSpacePanning = false;
 	controls.target.set( 0, 0, 0 );
 	controls.update();
-	
 
 	
 // промяна на размера на прозореца, вкл. и завъртане на смартфон
@@ -157,7 +156,7 @@ function ground()
 		texture.anisotropy = MAX_ANISOTROPY;
 
 	var material = new THREE.MeshStandardMaterial( {
-		color: 'forestgreen',
+		color: 'mediumseagreen',
 		roughness: 1,
 		metalness: 0,
 		map: texture,

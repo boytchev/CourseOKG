@@ -247,7 +247,7 @@ function moidom( FN = Date.now() )
 
 	// фиксиране на генератора на случайни числа
 	if( FN == '9MI0899999' )
-		THREE.MathUtils.seededRandom( 41027 );
+		THREE.MathUtils.seededRandom( 4105752 );
 	else
 	{	
 		var seed = 0;
@@ -260,9 +260,8 @@ function moidom( FN = Date.now() )
 
 
 	// генериране на пода на къщата
-
-	floor( random(-2,2), random(-2,2), random(10,14), random(6,8), 0 );
-	floor( random(-2,2), random(-2,2), random(6,8), random(10,14), 1 );
+	floor( -1, -2, 8, 12, 0 );
+	floor( 0, -1, 11, 8, 1 );
 
 }
 

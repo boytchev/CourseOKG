@@ -260,8 +260,8 @@ function moidom( FN = Date.now() )
 
 
 	// генериране на пода на къщата
-	floor( -1, -2, 8, 12, 0 );
-	floor( 0, -1, 11, 8, 1 );
+	floor( random(-2,2), random(-2,2), random(10,14), random(6,8), 0 );
+	floor( random(-2,2), random(-2,2), random(6,8), random(10,14), 1 );
 
 }
 

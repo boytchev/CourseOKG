@@ -238,7 +238,7 @@ function floor( x, y, sx, sy, i )
 }
 
 
-function moidom( FN = Date.now() )
+function domusMea( FN = Date.now() )
 {
 	FN += '';
 	
@@ -266,4 +266,4 @@ function moidom( FN = Date.now() )
 
 
 
-export { moidom, scene, renderer, camera };
+export { domusMea, scene, renderer, camera };

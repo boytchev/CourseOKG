@@ -142,8 +142,6 @@ function onWindowResize( event )
 // поддръжка на VR
 if( VRAvailable )
 {
-	var controllerModelFactory = new XRControllerModelFactory();
-
 	var move0 = false, // дали е натиснат левият спусък
 		move1 = false, // дали е натиснат десният спусък
 		controller0 = renderer.xr.getController( 0 ),

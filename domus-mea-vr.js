@@ -1,4 +1,4 @@
-﻿console.warn( `
+console.warn( `
   __________
  / / / / / /\\
 /_/_/_/_/_/  \\
@@ -12,6 +12,16 @@
 
 import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+import { VRButton } from 'three/addons/webxr/VRButton.js';
+
+var VRAvailable = false;
+
+if ( 'xr' in navigator ) {
+
+	await navigator.xr.isSessionSupported( 'immersive-vr' )
+			.then( supported => VRAvailable = supported );
+
+}
 
 
 // WebGL + включване на сенки
@@ -129,10 +139,53 @@ function onWindowResize( event )
 }			
 
 
-// главен анимационен цикъл
+// поддръжка на VR
+if( VRAvailable )
+{
+	var move0 = false, // дали е натиснат левият спусък
+		move1 = false, // дали е натиснат десният спусък
+		controller0 = renderer.xr.getController( 0 ),
+		controller1 = renderer.xr.getController( 1 );
+		
+	controller0.addEventListener( 'selectstart', function(){ move0 = true; } );
+	controller0.addEventListener( 'selectend', function(){ move0 = false; } );
 
+	controller1.addEventListener( 'selectstart', function(){ move1 = true; } );
+	controller1.addEventListener( 'selectend', function(){ move1 = false; } );
+
+	//controller0.add( new THREE.ArrowHelper( new THREE.Vector3(0,0,-1), new THREE.Vector3(0,0,0), 20, 'red', 1, 0.4 ) );
+	//scene.add( controller0 );
+
+				
+	// подвижен потребител
+	var user = new THREE.Group();
+		user.add( camera );
+		user.add( controller0 );
+		user.add( controller1 );
+		user.position.z = 10;
+
+		scene.add( user );
+					
+					
+	// главен анимационен цикъл
+
+	var v0 = new THREE.Vector3(), // за общи цели
+		v1 = new THREE.Vector3(); // за общи цели
+}
+
+			
 function animate( time )
 {
+	if( VRAvailable && ( move0 || move1 ) )
+	{
+		controller0.getWorldDirection( v0 );
+		controller0.getWorldDirection( v1 );
+		v0.add( v1 );
+		v0.y = 0;
+		v0.normalize();
+		user.position.addScaledVector( v0, -0.01 );
+	}
+								
 	controls.update( time );
 	renderer.render( scene, camera );
 }
@@ -262,8 +315,20 @@ function domusMea( FN = Date.now() )
 	floor( random(-2,2), random(-2,2), random(10,14), random(6,8), 0 );
 	floor( random(-2,2), random(-2,2), random(6,8), random(10,14), 1 );
 
+	// VR
+	if( VRAvailable )
+	{
+		document.body.appendChild( VRButton.createButton( renderer ) );
+		renderer.xr.enabled = true;
+	}
 }
 
 
 
+
+
 export { domusMea, scene, renderer, camera };
+
+
+
+export { VRButton };

@@ -11,7 +11,7 @@ console.warn( `
 
 
 import * as THREE from "three";
-import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 var VRAvailable = false;
@@ -47,14 +47,14 @@ var scene = new THREE.Scene();
 
 // камера и гледна точка
 
-var camera = new THREE.PerspectiveCamera( 60, 1, 0.01, 200 );
+var camera = new THREE.PerspectiveCamera( 60, 1, 0.01, 40 );
 	camera.position.set( 5, 15, 10 );
 	camera.lookAt( scene.position );
 
 
 // основна светлина
 
-var light = new THREE.SpotLight( 'white', 1 );
+var light = new THREE.SpotLight( 'white', 2 );
 	light.decay = 0;
 	light.position.set( 20, 80, 30 );
 	light.target = scene;
@@ -69,13 +69,13 @@ var light = new THREE.SpotLight( 'white', 1 );
 	light.shadow.camera.right = 50; 
 	light.shadow.camera.top = -50; 
 	light.shadow.camera.bottom = 50; 
-	light.shadow.bias = -0.0001; 
-	light.shadow.radius = 3;
+	light.shadow.bias = -0.001; 
+	light.shadow.radius = 1;
 
 	scene.add( light );
 
 
-var contraLight = new THREE.SpotLight( 'white', 2 );
+var contraLight = new THREE.SpotLight( 'white', 0.5 );
 	contraLight.decay = 0;
 	contraLight.position.set( -10, 80, -40 );
 	contraLight.target = scene;
@@ -142,6 +142,8 @@ function onWindowResize( event )
 // поддръжка на VR
 if( VRAvailable )
 {
+	var controllerModelFactory = new XRControllerModelFactory();
+
 	var move0 = false, // дали е натиснат левият спусък
 		move1 = false, // дали е натиснат десният спусък
 		controller0 = renderer.xr.getController( 0 ),
@@ -154,8 +156,14 @@ if( VRAvailable )
 	controller1.addEventListener( 'selectend', function(){ move1 = false; } );
 
 	//controller0.add( new THREE.ArrowHelper( new THREE.Vector3(0,0,-1), new THREE.Vector3(0,0,0), 20, 'red', 1, 0.4 ) );
-	//scene.add( controller0 );
+	
 
+	// 3D модели на контролерите
+	var arrow = new THREE.ArrowHelper( new THREE.Vector3(0,0,-1), new THREE.Vector3(0,0,0), 1, 'yellow' );
+
+	controller0.add( arrow );
+	controller1.add( arrow.clone() );
+		
 				
 	// подвижен потребител
 	var user = new THREE.Group();
@@ -179,11 +187,11 @@ function animate( time )
 	if( VRAvailable && ( move0 || move1 ) )
 	{
 		controller0.getWorldDirection( v0 );
-		controller0.getWorldDirection( v1 );
+		controller1.getWorldDirection( v1 );
 		v0.add( v1 );
 		v0.y = 0;
 		v0.normalize();
-		user.position.addScaledVector( v0, -0.01 );
+		user.position.addScaledVector( v0, -0.1 );
 	}
 								
 	controls.update( time );

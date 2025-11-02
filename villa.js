@@ -225,7 +225,7 @@ function createGround()
 
 	var simplex = new SimplexNoise( { random: THREE.MathUtils.seededRandom } );
 
-	var geometry = new THREE.PlaneGeometry( GROUND_SIZE, GROUND_SIZE, 160, 160 );
+	var geometry = new THREE.PlaneGeometry( GROUND_SIZE, GROUND_SIZE, VR_MODE?40:160, VR_MODE?40:160 );
 
 	var pos = geometry.getAttribute( 'position' ),
 		v = new THREE.Vector3(),

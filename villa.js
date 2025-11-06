@@ -70,8 +70,10 @@ function initScene( )
 	renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
 	renderer.setAnimationLoop( animate );
 	renderer.shadowMap.enabled = true;
-	renderer.shadowMap.type = THREE.VSMShadowMap;
-	//renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+	//renderer.shadowMap.type = THREE.VSMShadowMap;
+	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+	//renderer.shadowMap.type = THREE.BaseShadowMap;
+	//renderer.shadowMap.type = THREE.PCFShadowMap;
 	
 	document.body.appendChild( renderer.domElement );
 	document.body.style.margin = 0;
@@ -99,35 +101,35 @@ function initLights( )
 	
 	// основна светлина
 
-	light = new THREE.SpotLight( 'white', 2 );
+	light = new THREE.DirectionalLight( 'white', 3 );
 	light.decay = 0;
 	light.position.set( 10, 40, 15 );
 	light.target = scene;
-	light.angle = 0.25;
-	light.penumbra = 1;
+//	light.angle = 0.25;
+//	light.penumbra = 1;
 	light.castShadow = true;
 	light.shadow.mapSize.width = 1024*4;
 	light.shadow.mapSize.height = 1024*4; 
 	light.shadow.camera.near = 10; 
 	light.shadow.camera.far = 50; 
-	light.shadow.camera.left = -10; 
-	light.shadow.camera.right = 10; 
-	light.shadow.camera.top = -10; 
-	light.shadow.camera.bottom = 10; 
-	light.shadow.bias = -0.0005; 
-	light.shadow.radius = 2;
+	light.shadow.camera.left = -15; 
+	light.shadow.camera.right = 15; 
+	light.shadow.camera.top = -15; 
+	light.shadow.camera.bottom = 15; 
+	light.shadow.normalBias = 0.04; 
+	light.shadow.intensity = 0.5; 
+//	light.shadow.radius = 1;
+//	light.shadow.blurSamples = 1;
 
 	scene.add( light );
-	//scene.add( new THREE.SpotLightHelper(light) );
+
 
 	// контра светлина
 	
-	contraLight = new THREE.SpotLight( 'white', 2 );
+	contraLight = new THREE.DirectionalLight( 'white', 1.4 );
 	contraLight.decay = 0;
-	contraLight.position.set( -10, 80, -40 );
+	contraLight.position.set( -10, 10, -40 );
 	contraLight.target = scene;
-	contraLight.angle = 0.2;
-	contraLight.penumbra = 1;
 
 	scene.add( contraLight );
 
@@ -199,7 +201,7 @@ function createFloors()
 		var material = new THREE.MeshPhysicalMaterial( {
 			color: 'gainsboro',
 			roughness: 1,
-			metalness: 0,
+			metalness: 0.1,
 			map: texture[i],
 		} );
 
@@ -225,7 +227,7 @@ function createGround()
 
 	var simplex = new SimplexNoise( { random: THREE.MathUtils.seededRandom } );
 
-	var geometry = new THREE.PlaneGeometry( GROUND_SIZE, GROUND_SIZE, VR_MODE?40:160, VR_MODE?40:160 );
+	var geometry = new THREE.PlaneGeometry( GROUND_SIZE, GROUND_SIZE, 120, 120 );
 
 	var pos = geometry.getAttribute( 'position' ),
 		v = new THREE.Vector3(),

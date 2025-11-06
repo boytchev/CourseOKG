@@ -314,8 +314,7 @@ function createFloorMap( )
 				);
 	scene.add( fn );
 
-		user.rotation.set( 0, 0, 0 );
-	if( random(0,1)>-10.5 )
+	if( random(0,1)>0.5 )
 	{
 		floorX3 = random(-GROUND_SIZE/4,GROUND_SIZE/4);
 		floorY3 = GROUND_SIZE/4*Math.sign(random(0,1)-0.5);
@@ -325,7 +324,7 @@ function createFloorMap( )
 		user.position.set( floorX3, 0, 2*floorY3 );
 		
 		fn.rotation.set(-Math.PI/2,floorY3>0?0:Math.PI,0,'YXZ');
-		fn.position.set( floorX3, 0.01, 1.7*floorY3 );
+		fn.position.set( floorX3, 0.01, 1.9*floorY3 );
 	}
 	else
 	{
@@ -337,7 +336,7 @@ function createFloorMap( )
 		user.position.set( 2*floorX3, 0, floorY3 );
 		
 		fn.rotation.set(-Math.PI/2,floorX3>0?Math.PI/2:-Math.PI/2,0,'YXZ');
-		fn.position.set( 1.7*floorX3, 0.01, floorY3 );
+		fn.position.set( 1.9*floorX3, 0.01, floorY3 );
 	}
 
 	

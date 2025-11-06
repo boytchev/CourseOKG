@@ -7,7 +7,7 @@
 );
 
 
-const VR_MODE = false;
+const VR_MODE = (window.location.href.indexOf('.fmi.uni-sofia.')>2);
 
 
 import * as THREE from "three";
@@ -38,7 +38,7 @@ var renderer, scene, camera, light, contraLight, controls;
 
 var GROUND_SIZE = 20;
 
-var MAX_ANISOTROPY, texture=[];
+var MAX_ANISOTROPY, texture=[], textureFN;
 
 var floorX1, floorY1, floorSX1, floorSY1;
 var floorX2, floorY2, floorSX2, floorSY2;
@@ -172,7 +172,7 @@ function initControls()
 
 
 
-function initTextures()
+function initTextures( FN )
 {
 	// картинка на квадратчета
 
@@ -186,6 +186,25 @@ function initTextures()
 		texture[i].anisotropy = MAX_ANISOTROPY;
 	}
 		
+	var canvas = document.createElement( 'CANVAS' );
+		canvas.width = 512;
+		canvas.height = 64;
+
+	var context = canvas.getContext( '2d' );
+		context.font = "60px Arial";
+		context.strokeStyle = 'black';
+
+		//context.fillStyle = 'white';
+		//context.fillRect( 0,0,512,64 );
+		context.textAlign = 'center';
+		context.fillStyle = 'black';
+		context.fillText( FN, 256, 56 );
+
+	textureFN = new THREE.CanvasTexture( canvas );
+			//texture.repeat.set(-1,1);
+			//texture.wrapS = THREE.RepeatWrapping;
+		textureFN.anisotropy = 8;
+
 }
 
 
@@ -218,6 +237,7 @@ function createFloors()
 	floor( floorX1, floorY1, floorSX1, floorSY1, 0 );
 	floor( floorX2, floorY2, floorSX2, floorSY2, 1 );
 	floor( floorX3, floorY3, floorSX3, floorSY3, 2 );
+	
 }
 
 
@@ -286,14 +306,26 @@ function createFloorMap( )
 	floorSX2 = random(6,8);
 	floorSY2 = random(10,14);
 	
-	if( random(0,1)>0.5 )
+	// FN
+	
+	var fn = new THREE.Mesh(
+					new THREE.PlaneGeometry(2.6,0.3),
+					new THREE.MeshBasicMaterial({map:textureFN,transparent:true})
+				);
+	scene.add( fn );
+
+		user.rotation.set( 0, 0, 0 );
+	if( random(0,1)>-10.5 )
 	{
 		floorX3 = random(-GROUND_SIZE/4,GROUND_SIZE/4);
 		floorY3 = GROUND_SIZE/4*Math.sign(random(0,1)-0.5);
 		floorSX3 = 2;
 		floorSY3 = GROUND_SIZE/2;
-		user.position.set( floorX3, 0, 1.8*floorY3 );
-		user.lookAt( floorX3, 0, floorY3 );
+		user.rotation.set( 0, floorY3>0?0:Math.PI, 0 );
+		user.position.set( floorX3, 0, 2*floorY3 );
+		
+		fn.rotation.set(-Math.PI/2,floorY3>0?0:Math.PI,0,'YXZ');
+		fn.position.set( floorX3, 0.01, 1.7*floorY3 );
 	}
 	else
 	{
@@ -301,10 +333,14 @@ function createFloorMap( )
 		floorX3 = GROUND_SIZE/4*Math.sign(random(0,1)-0.5);
 		floorSY3 = 2;
 		floorSX3 = GROUND_SIZE/2;
-		user.position.set( 1.8*floorX3, 0, floorY3 );
-		user.lookAt( floorX3, 0, floorY3 );
+		user.rotation.set( 0, floorX3>0?Math.PI/2:-Math.PI/2, 0 );
+		user.position.set( 2*floorX3, 0, floorY3 );
+		
+		fn.rotation.set(-Math.PI/2,floorX3>0?Math.PI/2:-Math.PI/2,0,'YXZ');
+		fn.position.set( 1.7*floorX3, 0.01, floorY3 );
 	}
 
+	
 	if( floorSX1%2 ) floorX1 += 0.5;
 	if( floorSX2%2 ) floorX2 += 0.5;
 	if( floorSX3%2 ) floorX3 += 0.5;
@@ -339,7 +375,7 @@ function villa( FN = Date.now() )
 	initScene();
 	initLights();
 	initControls();
-	initTextures();
+	initTextures( FN );
 	initVR();
 
 	createFloorMap();

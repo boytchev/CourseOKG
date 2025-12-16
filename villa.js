@@ -392,9 +392,6 @@ function initVR()
 	{
 		document.body.appendChild( VRButton.createButton( renderer ) );
 		renderer.xr.enabled = true;
-		renderer.xr.addEventListener('sessionend', () => { cleanupVR(); });
-
-
 
 		move0 = false; // дали е натиснат левият спусък
 		move1 = false; // дали е натиснат десният спусък
@@ -426,21 +423,6 @@ function initVR()
 		scene.add( user );
 	}
 }
-
-
-
-function cleaupVR( )
-{
-	if( VRAvailable )
-	{
-		var session = renderer.xr.getSession();
-		if (session)
-		{
-			await session.end();
-		}
-	}
-}
-
 
 
 function animate( time )

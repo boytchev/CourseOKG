@@ -8,7 +8,8 @@
 
 
 const VR_MODE = (window.location.href.indexOf('.fmi.uni-sofia.')>2);
-
+const PARAMS = new URLSearchParams(document.location.search);
+const FLAT = PARAMS.has('2d') || PARAMS.has('2D');
 
 import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
@@ -64,6 +65,9 @@ function random( a, b )
 
 function initScene( )
 {
+	var e = document.getElementsByTagName('canvas');
+	if(e.length>0) e[0].remove();
+	
 	// WebGL + включване на сенки
 	
 	renderer = new THREE.WebGLRenderer( {antialias:true} );
@@ -84,13 +88,16 @@ function initScene( )
 	// сцена
 
 	scene = new THREE.Scene();
-	scene.background = new THREE.Color( 'black' );
+	scene.background = new THREE.Color( FLAT?'white':'black' );
 	scene.add( floors );
 
 	// камера и гледна точка
 
 	camera = new THREE.PerspectiveCamera( 60, 1, 0.01, 200 );
-	camera.position.set( 5, 15, 10 );
+	if( FLAT )
+		camera.position.set( 0, 20, 0 );
+	else
+		camera.position.set( 5, 15, 10 );
 	camera.lookAt( scene.position );
 }
 
@@ -143,18 +150,20 @@ function initControls()
 	
 	// интерактивно въртене
 
-	controls = new OrbitControls( camera, renderer.domElement );
-	controls.maxPolarAngle = Math.PI * 0.45;
-	controls.minDistance = 2;
-	controls.maxDistance = 30;
-	controls.enableDamping = true;
-	controls.dampingFactor = 0.05;
-	controls.rotateSpeed = 0.3;
-	controls.zoomSpeed = 13;
-	controls.panSpeed = 0.7;
-	controls.screenSpacePanning = false;
-	controls.target.set( 0, 0, 0 );
-	controls.update();
+	if( !FLAT ) {
+		controls = new OrbitControls( camera, renderer.domElement );
+		controls.maxPolarAngle = Math.PI * 0.45;
+		controls.minDistance = 2;
+		controls.maxDistance = 30;
+		controls.enableDamping = true;
+		controls.dampingFactor = 0.05;
+		controls.rotateSpeed = 0.3;
+		controls.zoomSpeed = 13;
+		controls.panSpeed = 0.7;
+		controls.screenSpacePanning = false;
+		controls.target.set( 0, 0, 0 );
+		controls.update();
+	}
 	
 	// промяна на размера на прозореца, вкл. и завъртане на смартфон
 				
@@ -175,12 +184,46 @@ function initControls()
 function initTextures( FN )
 {
 	// картинка на квадратчета
+	var N = 256;
+	var canvas = document.createElement( 'CANVAS' );
+		canvas.width = N;
+		canvas.height = N;
 
-	const TILE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgAQMAAABJtOi3AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAAGUExURcPDw/////joICQAAAASSURBVAjXY2AAgfr///8PTgIAnnZsBQ0uHE0AAAAASUVORK5CYII=';
+	var context = canvas.getContext( '2d' );
 
+	context.fillStyle = FLAT?'#bfefff':'black';
+	context.fillRect(0,0,N,N);
+	
+	context.fillStyle = 'white';
+	context.fillRect(FLAT?6:1,FLAT?6:1,N,N);
+	context.beginPath()
+	for( var i=1; i<5; i++ ) {
+		var j = i/5*N;
+		context.moveTo(-10,j);
+		context.lineTo(N+10,j);
+		context.moveTo(j,-10);
+		context.lineTo(j,N+10);
+	}
+	context.strokeStyle = FLAT?'#bfefff':'gray';
+	context.lineWidth = 1;
+	context.stroke();
+/*
+FLAT?'#79daf9':
+	context.globalAlpha = 0.5;
+	context.globalAlpha = 1;
+	context.filter = 'blur(1px)';
+	context.fillStyle = 'white';
+	context.fillRect(1.5,1.5,N-1.5,N-1.5);
+*/		
+	var tile = new THREE.CanvasTexture( canvas );
+//	tile.minFilter = THREE.NearestFilter;
+//	tile.maxFilter = THREE.NearestFilter;
+
+//	const TILE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgAQMAAABJtOi3AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAAGUExURcPDw/////joICQAAAASSURBVAjXY2AAgfr///8PTgIAnnZsBQ0uHE0AAAAASUVORK5CYII=';
+	
 	for( var i=0; i<3; i++ )
 	{
-		texture[i] = new THREE.TextureLoader().load( TILE );
+		texture[i] = tile.clone();//new THREE.TextureLoader().load( TILE );
 		texture[i].wrapS = THREE.RepeatWrapping;
 		texture[i].wrapT = THREE.RepeatWrapping;
 		texture[i].anisotropy = MAX_ANISOTROPY;
@@ -194,16 +237,18 @@ function initTextures( FN )
 		context.font = "60px Arial";
 		context.strokeStyle = 'black';
 
-		//context.fillStyle = 'white';
-		//context.fillRect( 0,0,512,64 );
+		if( FLAT )
+		{
+			context.fillStyle = 'white';
+			context.fillRect(0,0,512,64);
+		}
+		
 		context.textAlign = 'center';
-		context.fillStyle = 'black';
+		context.fillStyle = FLAT?'#098ac9':'black';
 		context.fillText( FN, 256, 56 );
 
 	textureFN = new THREE.CanvasTexture( canvas );
-			//texture.repeat.set(-1,1);
-			//texture.wrapS = THREE.RepeatWrapping;
-		textureFN.anisotropy = 8;
+	textureFN.anisotropy = 8;
 
 }
 
@@ -215,14 +260,20 @@ function createFloors()
 
 	function floor( x, y, sx, sy, i ) 
 	{
-		texture[i].repeat.set( 5*sx, 5*sy );
+		texture[i].repeat.set( (FLAT?1:1)*sx, (FLAT?1:1)*sy );
 
-		var material = new THREE.MeshPhysicalMaterial( {
-			color: 'gainsboro',
-			roughness: 1,
-			metalness: 0.1,
-			map: texture[i],
-		} );
+		if( FLAT ) {
+			var material = new THREE.MeshBasicMaterial( {
+				map: texture[i],
+			} );
+		} else {
+			var material = new THREE.MeshPhysicalMaterial( {
+				color: 'gainsboro',
+				roughness: 1,
+				metalness: 0.1,
+				map: texture[i],
+			} );
+		}
 
 		var mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( x, 0, y );
@@ -231,6 +282,18 @@ function createFloors()
 			mesh.rotation.x = -Math.PI/2;
 
 		floors.add( mesh );
+
+		if( FLAT ) {
+			var material = new THREE.MeshBasicMaterial( {color:0xbfefff,depthWrite:false} );
+			var mesh = new THREE.Mesh( geometry, material );
+				mesh.position.set( x, 0, y );
+				mesh.scale.set( sx+0.1, sy+0.1 );
+				mesh.rotation.x = -Math.PI/2;
+				mesh.renderOrder = -1;
+
+			floors.add( mesh );
+			
+		}
 		
 	} // floor
 
@@ -244,7 +307,8 @@ function createFloors()
 
 function createGround() 
 {
-
+	if( FLAT ) return;
+	
 	var simplex = new SimplexNoise( { random: THREE.MathUtils.seededRandom } );
 
 	var geometry = new THREE.PlaneGeometry( GROUND_SIZE, GROUND_SIZE, 120, 120 );
@@ -273,7 +337,6 @@ function createGround()
 	
 	geometry.computeVertexNormals();
 
-	
 	var material = new THREE.MeshStandardMaterial( {
 		color: 'mediumseagreen',
 		roughness: 1,
@@ -288,12 +351,22 @@ function createGround()
 		mesh.rotation.x = -Math.PI/2;
 
 	scene.add( mesh );
+	
 }
 
 
 
 function createFloorMap( )
 {
+	// FN
+	
+	var fn = new THREE.Mesh(
+					new THREE.PlaneGeometry((FLAT?2:1)*2.6,(FLAT?2:1)*0.3),
+					new THREE.MeshBasicMaterial({map:textureFN,transparent:true})
+				);
+	scene.add( fn );
+	var attempt = 0;
+do {
 	// генериране на пода на къщата
 
 	floorX1 = random(-2,2);
@@ -306,13 +379,6 @@ function createFloorMap( )
 	floorSX2 = random(6,8);
 	floorSY2 = random(10,14);
 	
-	// FN
-	
-	var fn = new THREE.Mesh(
-					new THREE.PlaneGeometry(2.6,0.3),
-					new THREE.MeshBasicMaterial({map:textureFN,transparent:true})
-				);
-	scene.add( fn );
 
 	if( random(0,1)>0.5 )
 	{
@@ -320,10 +386,14 @@ function createFloorMap( )
 		floorY3 = GROUND_SIZE/4*Math.sign(random(0,1)-0.5);
 		floorSX3 = 2;
 		floorSY3 = GROUND_SIZE/2;
+
+		if (floorX3<Math.min(floorX1-floorSX1/2,floorX2-floorSX2/2) ) floorX3 = Math.floor(Math.min(floorX1-floorSX1/3,floorX2-floorSX2/3));
+		if (floorX3>Math.max(floorX1+floorSX1/2,floorX2+floorSX2/2) ) floorX3 = Math.floor(Math.max(floorX1+floorSX1/3,floorX2+floorSX2/3));
+
 		user.rotation.set( 0, floorY3>0?0:Math.PI, 0 );
 		user.position.set( floorX3, 0, 2*floorY3 );
 		
-		fn.rotation.set(-Math.PI/2,floorY3>0?0:Math.PI,0,'YXZ');
+		fn.rotation.set(-Math.PI/2,floorY3>0?0:FLAT?0:Math.PI,0,'YXZ');
 		fn.position.set( floorX3, 0.01, 1.9*floorY3 );
 	}
 	else
@@ -332,14 +402,18 @@ function createFloorMap( )
 		floorX3 = GROUND_SIZE/4*Math.sign(random(0,1)-0.5);
 		floorSY3 = 2;
 		floorSX3 = GROUND_SIZE/2;
+
+		if (floorY3<Math.min(floorY1-floorSY1/2,floorY2-floorSY2/2) ) floorY3 = Math.floor(Math.min(floorY1-floorSY1/3,floorY2-floorSY2/3));
+		if (floorY3>Math.max(floorY1+floorSY1/2,floorY2+floorSY2/2) ) floorY3 = Math.floor(Math.max(floorY1+floorSY1/3,floorY2+floorSY2/3));
+
 		user.rotation.set( 0, floorX3>0?Math.PI/2:-Math.PI/2, 0 );
 		user.position.set( 2*floorX3, 0, floorY3 );
 		
 		fn.rotation.set(-Math.PI/2,floorX3>0?Math.PI/2:-Math.PI/2,0,'YXZ');
 		fn.position.set( 1.9*floorX3, 0.01, floorY3 );
 	}
-
 	
+			
 	if( floorSX1%2 ) floorX1 += 0.5;
 	if( floorSX2%2 ) floorX2 += 0.5;
 	if( floorSX3%2 ) floorX3 += 0.5;
@@ -347,13 +421,57 @@ function createFloorMap( )
 	if( floorSY2%2 ) floorY2 += 0.5;
 	if( floorSY3%2 ) floorY3 += 0.5;
 
+	if( FLAT )
+	{
+		var x = Math.min(floorX1-floorSX1/2,floorX2-floorSX2/2,floorX3-floorSX3/2)+Math.max(floorX1+floorSX1/2,floorX2+floorSX2/2,floorX3+floorSX3/2);
+		var y = Math.min(floorY1-floorSY1/2,floorY2-floorSY2/2,floorY3-floorSY3/2)+Math.max(floorY1+floorSY1/2,floorY2+floorSY2/2,floorY3+floorSY3/2);
+		camera.position.set( x/2, 18, y/2 );
+		camera.lookAt( x/2, 0, y/2 );
+
+	}
+	
+	function inside(x,center,span) {
+		return (center-span/2)<=x && x<=(center+span/2);
+	}
+	function check(x,y) {
+		x+=0.5;
+		y+=0.5;
+		return (
+			(inside(x,floorX1,floorSX1) && inside(y,floorY1,floorSY1))
+			|| (inside(x,floorX2,floorSX2) && inside(y,floorY2,floorSY2))
+			|| (inside(x,floorX3,floorSX3) && inside(y,floorY3,floorSY3))?1:0
+		);
+	}
+	var allc = 0;
+	for(var x=-GROUND_SIZE-4; x<=GROUND_SIZE+4; x++)
+	for(var y=-GROUND_SIZE-4; y<=GROUND_SIZE+4; y++)
+	{
+		var c = check(x,y)+check(x+1,y)+check(x,y+1)+check(x+1,y+1);
+		if( c==1 || c==3 ) allc++;
+	}
+
+}
+	while( allc<13 );
+
+attempt++
+//console.log(allc,'@'+attempt);
 }
 
 
 
-function villa( FN = Date.now() )
+function randomFN( )
 {
-	FN += '';
+	THREE.MathUtils.seededRandom( 4105752*Math.random() );
+	return random(0,9)+'MI'+random(0,9)+random(0,9)+random(0,9)+random(0,9)+random(0,9)+random(0,9)+random(0,9);
+}
+
+
+
+function villa( FN = randomFN() )
+{
+	FN = (PARAMS.get('fn') || FN)+'';
+
+	FN = FN.toUpperCase().replace(/[^A-Z0-9]/gm,"");
 	
 	floors.clear();
 
@@ -371,6 +489,13 @@ function villa( FN = Date.now() )
 
 	}
 
+	// if( FLAT ) {
+		// var fnBanner = document.createElement( 'div' );
+		// fnBanner.innerHTML = FN;
+		// fnBanner.style = 'position: fixed; top: 0; left: 50%; transform: translateX(-50%); padding:0.15em 0.25em 0.15em 0.25em; z-index: 1000; font-family: monospace,sans-serif; font-size: 2em; border-bottom-right-radius:0.5em; border-bottom-left-radius:0.5em; box-shadow: 0px 0px 15px lightgray;';
+		// document.body.appendChild( fnBanner );
+	// }
+	
 	initScene();
 	initLights();
 	initControls();
@@ -439,7 +564,7 @@ function animate( time )
 	}
 	else
 	{
-		controls.update( time );
+		controls?.update( time );
 	}
 	
 	renderer.render( scene, camera );

@@ -561,7 +561,7 @@ if( !FLAT ) {
 	}
 
 }
-	while( allc<13 && fn=='9MI0899999');
+	while( allc<13 /*&& fn=='9MI0899999'*/);
 
 attempt++
 //console.log(allc,'@'+attempt);

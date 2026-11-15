@@ -488,7 +488,7 @@ function randomFN( )
 
 
 
-new World( {controls:!FLAT, forceWebGL:true, antialias:false});
+new World( {controls:!FLAT, forceWebGL:!true,  men:1, women:1, children:1, population:10});
 await renderer.init();
 
 function villa( FN = randomFN() )
@@ -592,14 +592,17 @@ villa.update = function( time ) {
 }
 
 function man( height=1.7 ) {
+	pools.man = null;
 	return new Man( height );
 };
 
 function woman( height=1.6 ) {
+	pools.woman = null;
 	return new Woman( height );
 };
 
 function child( height=1.3 ) {
+	pools.child = null;
 	return new Child( height );
 };
 

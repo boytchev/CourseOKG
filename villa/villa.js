@@ -6,14 +6,14 @@
 `
 );
 
-const VR_MODE = (window.location.href.indexOf('.fmi.uni-sofia.')>2);
 const PARAMS = new URLSearchParams(document.location.search);
+const VR_MODE = PARAMS.has('vr') || PARAMS.has('VR') || PARAMS.has('xr') || PARAMS.has('XR');
 const FLAT = PARAMS.has('2d') || PARAMS.has('2D');
 const FAST = PARAMS.has('fast');
 
 import * as THREE from "three";
 import {mix,atan,Discard,normalLocal,normalWorld,transformNormalToView,float,If,Fn,time,mul,positionWorld,positionLocal, vec3, remap, remapClamp, mx_noise_float as perlin, mx_fractal_noise_float as fractal} from "three/tsl";
-import {Man,Woman,Child,World,camera,cameraLight,controls,light,ground,scene,renderer,random as randomd,regular,chaotic,everybody,velour,latex,bands,slice,pools} from "https://boytchev.github.io/disfigure/dist/disfigure.js";
+import {pools,Man,Woman,Child,World,camera,cameraLight,controls,light,ground,scene,renderer,random as randomd,regular,chaotic,everybody,velour,latex,bands,slice} from "https://boytchev.github.io/disfigure/src/disfigure.js";
 
 
 var GROUND_SIZE = 20;
@@ -27,39 +27,24 @@ var floorX3, floorY3, floorSX3, floorSY3;
 var floors = new THREE.Group();
 
 import {SimplexNoise} from "three/addons/math/SimplexNoise.js";
-/*
-
-import {OrbitControls} from "three/addons/controls/OrbitControls.js";
-import {VRButton} from 'three/addons/webxr/VRButton.js';
-import {pools,everybody} from 'disfigure';
-
+/*import {XRButton} from 'three/addons/webxr/XRButton.js';*/
 
 
 var VRAvailable = false;
+/*
 if ( VR_MODE && 'xr' in navigator ) {
 
 	await navigator.xr.isSessionSupported( 'immersive-vr' )
 			.then( supported => VRAvailable = supported );
-
+	console.log('VR',VRAvailable);
 }
-
-
-
-// public
-
-var renderer, scene, camera, light, contraLight, controls;
-
-
-
-// not public
 
 
 var move0, move1, controller0, controller1;
 var v = new THREE.Vector3();
-
-
 */
 var user = new THREE.Group();
+
 // случайно цяло число
 
 function random( a, b )
@@ -72,37 +57,8 @@ function random( a, b )
 
 function initScene( )
 {
-cameraLight.intensity = 0.25;
-	/*
-	var e = document.getElementsByTagName('canvas');
-	if(e.length>0) e[0].remove();
-	
-	// WebGL + включване на сенки
-	
-	renderer = new THREE.WebGPURenderer( {antialias:true} );
-	renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
-	renderer.setAnimationLoop( animate );
-	renderer.shadowMap.enabled = true;
-	//renderer.shadowMap.type = THREE.VSMShadowMap;
-	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-	//renderer.shadowMap.type = THREE.BaseShadowMap;
-	//renderer.shadowMap.type = THREE.PCFShadowMap;
-	
-	document.body.appendChild( renderer.domElement );
-	document.body.style.margin = 0;
-	document.body.style.overflow = 'hidden';
+	cameraLight.intensity = 0.25;
 
-	MAX_ANISOTROPY = 4//renderer.capabilities.getMaxAnisotropy();
-
-	// сцена
-
-	scene = new THREE.Scene();
-	scene.background = new THREE.Color( FLAT?'white':'black' );
-	scene.add( floors );
-*/
-	// камера и гледна точка
-
-//	camera = new THREE.PerspectiveCamera( 60, 1, 0.01, 200 );
 	if( FLAT ) {
 		scene.background = new THREE.Color( 'white' );
 	} else {
@@ -123,11 +79,8 @@ function initLights( )
 	
 	// основна светлина
 
-//	light = new THREE.DirectionalLight( 'white', 3 );
 	light.decay = 0;
 	light.position.set( 2, 4, 3 );
-//	light.target = scene;
-//	light.castShadow = true;
 /*	
 	light.shadow.mapSize.width = 1024*4;
 	light.shadow.mapSize.height = 1024*4; 
@@ -145,50 +98,8 @@ function initLights( )
 
 	light.shadow.radius = 2;
 	light.shadow.blurSamples = 4;
-	//scene.add( light );
-//	scene.add( new THREE.DirectionalLightHelper(light) );
-
-
-
 }
 
-
-/*
-function initControls()
-{
-	if( VRAvailable ) return;
-	
-	// интерактивно въртене
-
-	if( !FLAT ) {
-		controls = new OrbitControls( camera, renderer.domElement );
-		controls.maxPolarAngle = Math.PI * 0.45;
-		controls.minDistance = 2;
-		controls.maxDistance = 30;
-		controls.enableDamping = true;
-		controls.dampingFactor = 0.05;
-		controls.rotateSpeed = 0.3;
-		controls.zoomSpeed = 13;
-		controls.panSpeed = 0.7;
-		controls.screenSpacePanning = false;
-		controls.target.set( 0, 0, 0 );
-		controls.update();
-	}
-	
-	// промяна на размера на прозореца, вкл. и завъртане на смартфон
-				
-	window.addEventListener( 'resize', onWindowResize, false );
-	onWindowResize();
-
-	function onWindowResize( event )
-	{
-		camera.aspect = window.innerWidth / window.innerHeight;
-		camera.updateProjectionMatrix();
-
-		renderer.setSize( window.innerWidth, window.innerHeight, true );
-	}			
-}
-*/
 
 
 function initTextures( FN )
@@ -458,7 +369,7 @@ function createGround()
 
 
 
-function createFloorMap( )
+function createFloorMap( FN )
 {
 	// FN
 	
@@ -560,11 +471,11 @@ if( !FLAT ) {
 		if( c==1 || c==3 ) allc++;
 	}
 
-}
-	while( allc<13 /*&& fn=='9MI0899999'*/);
-
 attempt++
-//console.log(allc,'@'+attempt);
+//console.log('allc='+allc,' attempt='+attempt,' fn='+FN);
+}
+	while( allc<13 && FN!='9MI0899999');
+
 }
 
 
@@ -576,6 +487,9 @@ function randomFN( )
 }
 
 
+
+new World( {controls:!FLAT, forceWebGL:true, antialias:false});
+await renderer.init();
 
 function villa( FN = randomFN() )
 {
@@ -597,50 +511,48 @@ function villa( FN = randomFN() )
 
 	}
 	
-	new World( {controls:!FLAT});
 	scene.add( floors );
 
 	initScene();
 	initLights();
-	// initControls();
 	initTextures( FN );
-	// initVR();
+//	initVR();
 
-	createFloorMap();
+	createFloorMap( FN );
 	createFloors();
 	createGround();
 
 }
 
-/*
 
+/*
 function initVR()
 {
 	// поддръжка на VR
 	if( VRAvailable )
 	{
-		document.body.appendChild( VRButton.createButton( renderer ) );
 		renderer.xr.enabled = true;
+		renderer.xr.setFoveation( 0 );
+		document.body.appendChild( XRButton.createButton( renderer ) );
 
-		move0 = false; // дали е натиснат левият спусък
-		move1 = false; // дали е натиснат десният спусък
+		move0 = false;
+		move1 = false;
 		controller0 = renderer.xr.getController( 0 );
 		controller1 = renderer.xr.getController( 1 );
 			
-		controller0.addEventListener( 'selectstart', function(){ move0 = true; } );
-		controller0.addEventListener( 'selectend', function(){ move0 = false; } );
+		controller0.addEventListener( 'selectstart', function(){ move0 = true; console.log('move0-on');} );
+		controller0.addEventListener( 'selectend', function(){ move0 = false; console.log('move0-off');} );
 
-		controller1.addEventListener( 'selectstart', function(){ move1 = true; } );
-		controller1.addEventListener( 'selectend', function(){ move1 = false; } );
+		controller1.addEventListener( 'selectstart', function(){ move1 = true; console.log('move1-on');} );
+		controller1.addEventListener( 'selectend', function(){ move1 = false; console.log('move1-off');} );
 
 		controller0.add( new THREE.ArrowHelper( new THREE.Vector3(0,0,-1), new THREE.Vector3(0,0,0), 1, 'red', 0.1, 0.04 ) );
 		
 		controller1.add( new THREE.ArrowHelper( new THREE.Vector3(0,0,-1), new THREE.Vector3(0,0,0), 1, 'red', 0.1, 0.04 ) );
 		
-		scene.add( controller0, controller1 );
+		//scene.add( controller0, controller1 );
 
 					
-		// подвижен потребител
 		camera.position.set(0,0,0);
 		camera.rotation.set(0,0,0);
 		
@@ -652,10 +564,10 @@ function initVR()
 		scene.add( user );
 	}
 }
+*/
 
-
-function animate( time )
-{
+villa.update = function( time ) {
+	
 	if( VRAvailable )
 	{
 		if( move0 || move1 )
@@ -664,28 +576,14 @@ function animate( time )
 			if( move1 ) controller1.getWorldDirection( v );
 			v.normalize();
 			user.position.addScaledVector( v, -0.1 );
+			console.log('pos',...user.position);
+			console.log(renderer.xr.isPresenting)
 		}
 	}
 	else
 	{
 		controls?.update( time );
 	}
-	
-	everybody.forEach( e=>{
-		e.update();
-	}	);
-	
-	renderer.render( scene, camera );
-}
-
-
-
-export { villa, renderer, scene, camera, light, contraLight, controls, VRButton };
-*/
-
-villa.update = function( time ) {
-	
-	controls?.update( time );
 	
 	everybody.forEach( e=>{
 		e.update();
@@ -706,5 +604,5 @@ function child( height=1.3 ) {
 };
 
 
-export {villa,man,woman,child,camera,cameraLight,controls,light,ground,scene,renderer,randomd as random,regular,chaotic,everybody,velour,latex,bands,slice};
+export {villa,man,woman,child,camera,cameraLight,controls,light,ground,scene,renderer,randomd as random,regular,chaotic,everybody,velour,latex,bands,slice,user};
 

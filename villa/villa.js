@@ -683,6 +683,16 @@ function animate( time )
 export { villa, renderer, scene, camera, light, contraLight, controls, VRButton };
 */
 
+villa.update = function( time ) {
+	
+	controls?.update( time );
+	
+	everybody.forEach( e=>{
+		e.update();
+	}	);
+	
+}
+
 function man( height=1.7 ) {
 	return new Man( height );
 };

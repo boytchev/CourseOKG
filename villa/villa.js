@@ -13,7 +13,7 @@ const FAST = PARAMS.has('fast');
 
 import * as THREE from "three";
 import {mix,atan,Discard,normalLocal,normalWorld,transformNormalToView,float,If,Fn,time,mul,positionWorld,positionLocal, vec3, remap, remapClamp, mx_noise_float as perlin, mx_fractal_noise_float as fractal} from "three/tsl";
-import {Man,Woman,Child,World,camera,cameraLight,controls,light,ground,scene,renderer} from "https://boytchev.github.io/disfigure/dist/disfigure.js";
+import {Man,Woman,Child,World,camera,cameraLight,controls,light,ground,scene,renderer,random as randomd,regular,chaotic,everybody,velour,latex,bands,slice,pools} from "https://boytchev.github.io/disfigure/dist/disfigure.js";
 
 
 var GROUND_SIZE = 20;
@@ -696,5 +696,5 @@ function child( height=1.3 ) {
 };
 
 
-export {villa,man,woman,child,camera,cameraLight,controls,light,ground,scene,renderer};
+export {villa,man,woman,child,camera,cameraLight,controls,light,ground,scene,renderer,randomd as random,regular,chaotic,everybody,velour,latex,bands,slice};
 

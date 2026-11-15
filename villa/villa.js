@@ -593,17 +593,24 @@ villa.update = function( time ) {
 
 function man( height=1.7 ) {
 	pools.man = null;
-	return new Man( height );
+	var fig = new Man( height );
+	return fig;
 };
 
 function woman( height=1.6 ) {
 	pools.woman = null;
-	return new Woman( height );
+	var fig = new Woman( height );
+	fig.l_arm.x = -3;
+	fig.r_arm.x = -3;
+	fig.l_arm.z = -87;
+	fig.r_arm.z = -87;
+	return fig;
 };
 
 function child( height=1.3 ) {
 	pools.child = null;
-	return new Child( height );
+	var fig = new Child( height ); 
+	return fig;
 };
 
 

@@ -85,19 +85,21 @@ function initLights( )
 	light.shadow.mapSize.width = 1024*4;
 	light.shadow.mapSize.height = 1024*4; 
 */
-	light.shadow.camera.near = 0; 
-	light.shadow.camera.far = 20; 
+	light.shadow.camera.near = -10; 
+	light.shadow.camera.far = 30; 
 	
-	light.shadow.camera.left = -20; 
-	light.shadow.camera.right = 20; 
-	light.shadow.camera.top = -20; 
-	light.shadow.camera.bottom = 20; 
+	light.shadow.camera.left = -30; 
+	light.shadow.camera.right = 30; 
+	light.shadow.camera.top = -30; 
+	light.shadow.camera.bottom = 30; 
 	light.shadow.normalBias = 0.04; 
 	light.shadow.bias = -0.0004; 
 	light.shadow.intensity = 1; 
 
 	light.shadow.radius = 2;
 	light.shadow.blurSamples = 4;
+	
+	light.shadow.camera.updateProjectionMatrix();
 }
 
 
